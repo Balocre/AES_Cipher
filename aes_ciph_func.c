@@ -72,11 +72,6 @@ uint8_t * cipher_block(uint8_t *block, uint8_t *key, int key_size)
 
 	State_t state;
 
-	printf("input block : ");
-	for(j=0; j<16; j++)
-		printf("%x", block[j]);
-	printf("\n");
-
 	for(i=0; i<4; i++)
 		for(j=0; j<4; j++)
 			state.by_el[4*j+i] = block[4*i+j];
@@ -109,12 +104,6 @@ uint8_t * cipher_block(uint8_t *block, uint8_t *key, int key_size)
 			block[4*i+j] = state.by_el[4*j+i];
 			block[4*i+j] = state.by_el[4*j+i];
 		}
-
-	printf("output block : ");
-	for(j=0; j<16; j++)
-		printf("%x", block[j]);
-	printf("\n");
-
 
 	return block;
 }
