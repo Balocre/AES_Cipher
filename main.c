@@ -29,6 +29,7 @@ void main()
 	output = cipher_block(input, key, key_size);
 	output = decipher_block(output, key, key_size);
 
-	cipher_text("abcdefghijklmnopabcdefghijklmnop", key, key_size);
+	char *ciphered_text = cipher_text("abcdefghijklmnopabcdefghij", key, key_size);
+	decipher_text(ciphered_text, key, key_size);
 
 }
