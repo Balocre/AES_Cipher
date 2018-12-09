@@ -30,10 +30,10 @@ int main(int arc, char *argv[])
 	//output = cipher_block(input, key, key_size);
 	//output = decipher_block(output, key, key_size);
 
-	char *ciphered_text = cipher_text("ABCDEF", key, key_size);
+	char *ciphered_text = cipher_text("ABCDEF\n", key, key_size);
 	char *plain_text = decipher_text(ciphered_text, key, key_size);
 
-	cipher_file("testfile", key, key_size);
+	decipher_file("testfile", key, key_size);
 
 	return EXIT_SUCCESS;
 

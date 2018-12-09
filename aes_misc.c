@@ -94,7 +94,7 @@ int cipher_file(char *file_path, uint8_t *key, int key_size){
     fpos_t *pos = malloc(sizeof(fpos_t));
     char *block = malloc(16*sizeof(uint8_t));
 
-    if ( !(file = fopen(file_path, "r+b")) ) {
+    if ( !(file = fopen(file_path, "rb+")) ) {
       return EXIT_FAILURE;
     }
 
@@ -102,10 +102,10 @@ int cipher_file(char *file_path, uint8_t *key, int key_size){
 
       while( ( read_char_count = fread(block, 1, 16*sizeof(uint8_t), file) ) > 0 ) {
         block = cipher_block(block, key, key_size);
-        fseek(file, -16, SEEK_CUR);
-        wrote_char_count = fwrite(block , 1, read_char_count*sizeof(uint8_t), file);
-        printf("%d\n", wrote_char_count);
-        fseek(file, +16, SEEK_CUR);
+        printf("cblock : %s\n", block);
+        fseek(file, -read_char_count, SEEK_CUR);
+        wrote_char_count = fwrite(block , 1, 16*sizeof(uint8_t), file);
+        printf("chars wrote : %d\n", wrote_char_count);
       }
 
     }
@@ -129,9 +129,8 @@ int decipher_file(char *file_path, uint8_t *key, int key_size){
 
       while( ( read_char_count = fread(block, 1, 16*sizeof(uint8_t), file) ) > 0 ) {
         block = decipher_block(block, key, key_size);
-        fseek(file, -16, SEEK_CUR);
-        wrote_char_count = fwrite(block , 1, read_char_count*sizeof(uint8_t), file);
-        fseek(file, +16, SEEK_CUR);
+        fseek(file, -read_char_count, SEEK_CUR);
+        wrote_char_count = fwrite(block , 1, 16*sizeof(uint8_t), file);
       }
 
     }
