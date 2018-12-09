@@ -10,4 +10,5 @@ Will make a make later <3
 
 It can cipher/decipher text (or any data) of unspecified length block by block (very unsafe) as well as single blocks of 128bits using 128, 192 or 256 bits keys
 
-The key can be changed in the main.c file, remember to specify the correct key length, you have to change key_size, 128bit key -> key_size = 4, 192bit key -> key_size = 6, 256bit key -> key_size = 8
+The key can be changed in the main.c file, remember to specify the correct key length, you have to change key_size, 128bit key -> key_size = 128, 192bit key -> key_size = 192, 256bit key -> key_size = 256
+
