@@ -1,4 +1,4 @@
-/* aes_ctypes.h -- Custome types declaratiosn*/
+/* aes_ctypes.h -- Custom types declaratiosn*/
 
 #ifndef AES_CTYPES_H
 #define AES_CTYPES_H
