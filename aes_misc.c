@@ -1,10 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdint.h>
-
-#include "aes_ciph_func.h"
-#include "aes_dciph_func.h"
+#include "aes_misc.h"
 
 char * cipher_text(char *plain_text, uint8_t *key, int key_size){
 
@@ -86,7 +80,7 @@ char * decipher_text(char *ciphered_text, uint8_t *key, int key_size){
   return plain_text;
 }
 
-int cipher_file(char *file_path, uint8_t *key, int key_size){
+int ecb_cipher(char *file_path, uint8_t *key, int key_size){
 
     FILE *file;
     size_t read_char_count, wrote_char_count;
@@ -113,7 +107,7 @@ int cipher_file(char *file_path, uint8_t *key, int key_size){
     return EXIT_SUCCESS;
 }
 
-int decipher_file(char *file_path, uint8_t *key, int key_size){
+int ecb_decipher(char *file_path, uint8_t *key, int key_size){
 
     FILE *file;
     size_t read_char_count, wrote_char_count;
@@ -125,9 +119,10 @@ int decipher_file(char *file_path, uint8_t *key, int key_size){
       return EXIT_FAILURE;
     }
 
-    while(!feof(file)){
+    while ( !feof(file) ) {
 
-      while( ( read_char_count = fread(block, 1, 16*sizeof(uint8_t), file) ) > 0 ) {
+      while( ( read_char_count = fread(block, 1, 16*sizeof(uint8_t), file) ) > 0 )
+      {
         block = decipher_block(block, key, key_size);
         fseek(file, -read_char_count, SEEK_CUR);
         wrote_char_count = fwrite(block , 1, 16*sizeof(uint8_t), file);
@@ -136,4 +131,37 @@ int decipher_file(char *file_path, uint8_t *key, int key_size){
     }
     fclose(file);
     return EXIT_SUCCESS;
+}
+
+// !! CHANGE IV TO SOMETHING RANDOM AND RETURN IT
+int ofb_cipher(char *file_path, uint8_t *key, int key_size) {
+  FILE *file;
+  size_t read_char_count;
+  uint8_t *ciphered_block, *data_block;
+  int i;
+
+  uint8_t iv[] = "0123456789ABCDEF";
+
+  ciphered_block = malloc(16*sizeof(uint8_t));
+  data_block = malloc(16*sizeof(uint8_t));
+
+  for(i=0; i<16; i++)
+   ciphered_block[i] = iv[i];
+
+  if ( !(file = fopen(file_path, "rb+")) ) {
+    return EXIT_FAILURE;
+  }
+
+  while( (read_char_count = fread(data_block, 1, 16*sizeof(uint8_t), file)) > 0)
+  {
+    ciphered_block = cipher_block(ciphered_block, key, key_size);
+    for(i=0; i<16; i++){
+      data_block[i] ^= ciphered_block[i];
+    }
+    fseek(file, -read_char_count, SEEK_CUR);
+    fwrite(data_block, 1, 16*sizeof(uint8_t), file);
+  }
+
+  fclose(file);
+  return EXIT_SUCCESS;
 }

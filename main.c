@@ -1,13 +1,16 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 
-#include "aes_ciph_func.h"
-#include "aes_dciph_func.h"
+#include "aes_func.h"
 #include "aes_misc.h"
 
-int main(int arc, char *argv[])
+int main(int argc, char *argv[])
 {
+	int opt;
+	uint8_t *output;
 
 	uint8_t input[16] = {0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0X70};
 	//uint8_t input[16] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
@@ -25,15 +28,46 @@ int main(int arc, char *argv[])
 	int key_size = 256;
 	uint8_t key[32]  = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f};
 
-	// uint8_t *output;
+	char *operation = NULL;
+	char *mode = NULL;
+	char *filename = NULL;
 
-	//output = cipher_block(input, key, key_size);
-	//output = decipher_block(output, key, key_size);
+	while( (opt = getopt(argc, argv, "o:m:f:")) != -1)
+	{
+			switch (opt) {
+				case 'o' :
+					operation = optarg;
+					break;
+				case 'm' :
+					mode = optarg;
+					break;
+				case 'f':
+					filename = optarg;
+					break;
+				default :
+					break;
+			}
+	}
 
-	char *ciphered_text = cipher_text("ABCDEF\n", key, key_size);
-	char *plain_text = decipher_text(ciphered_text, key, key_size);
+	printf("key : %s\n"
+				 "key size : %d\n",
+				 key, key_size);
+	printf("sample input : %s\n", input);
+	output = cipher_block(input, key, key_size);
+	printf("ciphered     : %s\n", output);
+	output = decipher_block(output, key, key_size);
+	printf("deciphered   : %s\n", output);
 
-	decipher_file("testfile", key, key_size);
+	if (!strcmp(operation, "cipher")) {
+		ofb_cipher(filename, key, key_size);
+	}
+	else if (!strcmp(operation, "decipher")) {
+		ofb_cipher(filename, key, key_size);
+	}
+	else {
+		printf("NO ARGS SUPPLIED\n");
+		return EXIT_FAILURE;
+	}
 
 	return EXIT_SUCCESS;
 
