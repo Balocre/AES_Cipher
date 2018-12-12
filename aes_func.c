@@ -1,4 +1,12 @@
-/* aes_cyph_func.h -- View aes_cipher_functions.h for detaileld informations */
+/*
+/ aes_func.c
+/
+/ This file contains the main function of the encryption process of the AES
+/ cipher
+/
+/ The key expansion routine functions definitions can be found in file
+/ the key_exp_func.c
+/ */
 
 #include "aes_func.h"
 
@@ -12,9 +20,10 @@ int sub_bytes(uint8_t *state, const uint8_t sub_box[16][16])
 	return EXIT_SUCCESS;
 }
 
-// direction : -1 gauche, +1 droite
+// direction : -1 = LEFT, +1 = RIGHT
 int shift_rows(uint32_t *state, int direction)
 {
+	// Calculates the shift coefficients needed to perform the row circular permutation
   int aa = abs(direction*16-8);
   int bb = abs(direction*16+8);
 
@@ -26,7 +35,7 @@ int shift_rows(uint32_t *state, int direction)
 	return EXIT_SUCCESS;
 }
 
-//find a way to only work on 1 column at a time
+// TODO : find a way to only work on 1 column at a time
 int mix_columns(uint8_t *state, const uint8_t aes_mult_mat[4][4])
 {
 	int i, j, k;

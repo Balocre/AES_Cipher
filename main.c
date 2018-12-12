@@ -58,10 +58,10 @@ int main(int argc, char *argv[])
 	output = decipher_block(output, key, key_size);
 	printf("deciphered   : %s\n", output);
 
-	if (!strcmp(operation, "cipher")) {
+	if (strcmp(operation, "cipher") == 0) {
 		ofb_cipher(filename, key, key_size);
 	}
-	else if (!strcmp(operation, "decipher")) {
+	else if (strcmp(operation, "decipher") == 0) {
 		ofb_cipher(filename, key, key_size);
 	}
 	else {

@@ -1,14 +1,43 @@
-# AES_Cipher
+# C AES Cipher
 
-### about the project :
+Disclaimer : I am working on this project to train myself, and it is not safe
+(and probably will never be) for encryption usage and can in no way be held
+accountable to damages caused by the use of this program.
 
-An implementation of the AES cipher as defined by NIST FIPS 197 that can be found here : https://nvlpubs.nist.gov/nistpubs/fips/nist.fips.197.pdf
+Feel free to download and share the code as you please but give me credits if
+you do so
 
-Compile using : gcc -std=c99 -o aes.out aes_ciph_func.c aes_dciph_func.c aes_kexp_func.c aes_math.c aes_const.c main.c
+There is still plenty of work to do and I will update it when I can, any
+improvement suggestion (about the algorithm or my code in general), advices or
+questions, are welcome, and you can contact me at this address :
+antoineaudras[at]gmail[dot]com
 
+### In short :
+
+An encryption program built around an implementation of a FIPS-197 compliant AES
+cipher
+
+### Specifications :
+
+Block size : 128 bits
+Accepted key length : 128, 192 or 256 bits
+
+Cipher modes : ECB and OFB
+
+### Features
+
+It can cipher/decipher text (or any data) of unspecified length with different
+modes of encryption using 128, 192 or 256 bits keys
+
+### Usage :
+
+Compile all the c files (gcc -o aes \*.c)
 Will make a make later <3
 
-It can cipher/decipher text (or any data) of unspecified length block by block (very unsafe) as well as single blocks of 128bits using 128, 192 or 256 bits keys
+Options :
 
-The key can be changed in the main.c file, remember to specify the correct key length, you have to change key_size, 128bit key -> key_size = 128, 192bit key -> key_size = 192, 256bit key -> key_size = 256
+- o -> operation : cipher | decipher
+- m -> mode : ECB | OFB
+- f -> file : path to the file you want to operate on
 
+ex : aes -o cipher -m OFB -f myfile
