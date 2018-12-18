@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <openssl/sha.h>
 
 #include "aes_func.h"
 #include "aes_misc.h"
@@ -10,8 +11,10 @@
 int main(int argc, char *argv[])
 {
 //----------------------------------------------------------------------------//
-	// This part is just for testing purposes, if all is right, deciphered content should be equal to input string else this means the aes is badly broken
+	// This part is just for testing purposes, if all is right, deciphered content
+	// should be the same as input string else this means the aes is badly broken
 
+	/*
 	uint8_t *output;
 
 	uint8_t input[16] = {0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0X70};
@@ -38,19 +41,21 @@ int main(int argc, char *argv[])
 	printf("ciphered     : %s\n", output);
 	output = decipher_block(output, key, key_size);
 	printf("deciphered   : %s\n", output);
+	*/
 
 //----------------------------------------------------------------------------//
 
 	int opt;
 
-	FILE* file;
-
 	char *operation = NULL;
 	char *filepath = NULL;
+	unsigned char *password = NULL;
 
 	enum EncryptionMode {ECB, OFB} emode;
 
-	// Get options
+	password = calloc(32, sizeof(unsigned char));
+
+	// Evaluate options
 	while( (opt = getopt(argc, argv, "o:m:f:")) != -1)
 	{
 		switch (opt) {
@@ -69,11 +74,20 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	printf("password : ", password);
+	scanf("%s", password);
+
+	unsigned char hashedpw[SHA256_DIGEST_LENGTH];
+	SHA256(password, 32, hashedpw);
+
+	// Removes password content
+	free(password);
+
 	if (strcmp(operation, "cipher") == 0) {
-		encrypt_file(key, key_size, emode, filepath);
+		encrypt_file(hashedpw, 256, emode, filepath);
 	}
 	else if (strcmp(operation, "decipher") == 0) {
-		decrypt_file(key, key_size, emode, filepath);
+		decrypt_file(hashedpw, 256, emode, filepath);
 	}
 	else {
 		printf("Unknow operation\n");

@@ -1,5 +1,4 @@
 # C AES FILE ENCRYPTION PROGRAM
--------------------------------
 
 ### In short :
 --------------
@@ -39,8 +38,8 @@ Available cipher modes : OFB
 ### Features
 ------------
 
-It can cipher/decipher any file of unspecified length (as long as you have
-enough memory space available ) with different modes of encryption using 128,
+It can encrypt/decrypt any file of unspecified length (as long as you have
+enough memory space available) with different modes of encryption using 128,
 192 or 256 bits keys
 
 ### Usage :
@@ -52,7 +51,9 @@ Will make a make later <3
 Options :
 
 - o -> operation : cipher | decipher
-- m -> mode : ECB | OFB
-- f -> file : path to the file you want to operate on
+- m -> mode : OFB (others will come later)
+- f -> filepath : path to the file you want to operate on
 
 ex : ./aes -o cipher -m OFB -f myfile
+
+You will be prompted for a password, enter anything you want but beware! There is no safety mechanism atm and __if you enter a different password when decrypting the file it will be corrupted and your data will be lost!__. So, only use it on file you don't mind loosing (you can use the "testfile" from the project folder).
