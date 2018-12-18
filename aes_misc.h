@@ -11,7 +11,7 @@
 
 int encrypt_file(uint8_t* key, int key_size, int encryption_mode, char* filepath);
 
-int decrypt_file(uint8_t* key, int key_size, int encryption_mode, FILE* ciph_file);
+int decrypt_file(uint8_t* key, int key_size, int encryption_mode, char* filepath);
 
 int ofb_round(uint8_t* key, int key_size, uint8_t* iv, uint8_t* data_block);
 
