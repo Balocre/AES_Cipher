@@ -9,7 +9,9 @@
 
 int main(int argc, char *argv[])
 {
-	int opt;
+//----------------------------------------------------------------------------//
+	// This part is just for testing purposes, if all is right, deciphered content should be equal to input string else this means the aes is badly broken
+
 	uint8_t *output;
 
 	uint8_t input[16] = {0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0X70};
@@ -28,47 +30,55 @@ int main(int argc, char *argv[])
 	int key_size = 256;
 	uint8_t key[32]  = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f};
 
-	char *operation = NULL;
-	char *mode = NULL;
-	char *filename = NULL;
-
-	while( (opt = getopt(argc, argv, "o:m:f:")) != -1)
-	{
-			switch (opt) {
-				case 'o' :
-					operation = optarg;
-					break;
-				case 'm' :
-					mode = optarg;
-					break;
-				case 'f':
-					filename = optarg;
-					break;
-				default :
-					break;
-			}
-	}
-
 	printf("key : %s\n"
 				 "key size : %d\n",
-				 key, key_size);
+				  key, key_size);
 	printf("sample input : %s\n", input);
 	output = cipher_block(input, key, key_size);
 	printf("ciphered     : %s\n", output);
 	output = decipher_block(output, key, key_size);
 	printf("deciphered   : %s\n", output);
 
+//----------------------------------------------------------------------------//
+
+	int opt;
+
+	FILE* file;
+
+	char *operation = NULL;
+	char *filepath = NULL;
+
+	enum EncryptionMode {ECB, OFB} emode;
+
+	// Get options
+	while( (opt = getopt(argc, argv, "o:m:f:")) != -1)
+	{
+		switch (opt) {
+		case 'o' :
+			operation = optarg;
+			break;
+		case 'm' :
+			if (strcmp(optarg, "OFB") == 0) {emode = OFB; break;}
+			else if (strcmp(optarg, "ECB") == 0) {emode = ECB; break;}
+			break;
+		case 'f':
+			filepath = optarg;
+			break;
+		default :
+			break;
+		}
+	}
+
 	if (strcmp(operation, "cipher") == 0) {
-		ofb_cipher(filename, key, key_size);
+		encrypt_file(key, key_size, emode, filepath);
 	}
 	else if (strcmp(operation, "decipher") == 0) {
-		ofb_cipher(filename, key, key_size);
+		decrypt_file(key, key_size, emode, filepath);
 	}
 	else {
-		printf("NO ARGS SUPPLIED\n");
+		printf("Unknow operation\n");
 		return EXIT_FAILURE;
 	}
 
 	return EXIT_SUCCESS;
-
 }

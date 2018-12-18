@@ -25,7 +25,7 @@ int shift_rows(uint32_t *state, int direction)
 {
 	// Calculates the shift coefficients needed to perform the row circular permutation
   int aa = abs(direction*16-8);
-  int bb = abs(direction*16+8);
+  int bb = abs(direction*16+8); // Or 32 - aa
 
   // sate[0] stays unchanged
   state[1] = (state[1] >> aa) | (state[1] << bb);
@@ -53,6 +53,7 @@ int mix_columns(uint8_t *state, const uint8_t aes_mult_mat[4][4])
 	return EXIT_SUCCESS;
 }
 
+// TODO : only store necessary round key and not whole 32 bytes
 int add_round_key(uint8_t *state, uint32_t *extanded_key, int rnd)
 {
 	int i;
@@ -68,7 +69,7 @@ int add_round_key(uint8_t *state, uint32_t *extanded_key, int rnd)
 	return EXIT_SUCCESS;
 }
 
-uint8_t * cipher_block(uint8_t *block, uint8_t *key, int key_size)
+uint8_t* cipher_block(uint8_t* block, uint8_t* key, int key_size)
 {
 	int i, j;
 	uint32_t *expanded_key;
@@ -99,6 +100,7 @@ uint8_t * cipher_block(uint8_t *block, uint8_t *key, int key_size)
   add_round_key(state.by_el, expanded_key, i);
 
   // Copy state to the returned ciphered data block
+	// Transposition because data is written in state columns
 	for(i=0; i<4; i++)
 		for(j=0; j<4; j++)
 		{

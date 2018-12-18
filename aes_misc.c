@@ -1,167 +1,137 @@
 #include "aes_misc.h"
 
-char * cipher_text(char *plain_text, uint8_t *key, int key_size){
+int encrypt_file(uint8_t* key, int key_size, int encryption_mode, char* filepath) {
 
-  int i, j, block_count;
-  char *ciphered_block;
-  char *ciphered_text;
+  FILE* file;
 
-  // defines the number of block of 16 chars the text contains
-  block_count = (int)((strlen(plain_text)-1)/16)+1;
+  file = fopen(filepath, "rb");
 
-  ciphered_text = malloc(16*block_count*sizeof(char));
-
-  // allocates the memory for the arry of blocks
-  char **block_arr = malloc(block_count*sizeof(char *));
-  for(i=0; i<block_count; i++)
-    block_arr[i] = malloc(16*sizeof(char));
-
-  //cuts down the text into blocks of 128 bits and fills the block array
-  for(i=0; i<block_count; i++)
-    for(j=0; j<16; j++)
-      block_arr[i][j] = plain_text[16*i+j];
-
-  for(i=0; i<block_count; i++)
-  {
-    ciphered_block = cipher_block(block_arr[i], key, key_size);
-    for(j=0; j<16; j++)
-        block_arr[i][j] = ciphered_block[j];
-  }
-
-  for(i=0; i<block_count; i++)
-  {
-    for(j=0; j<16; j++)
-        ciphered_text[16*i+j] = block_arr[i][j];
-  }
-
-  printf("ciphered text : ");
-  for(i=0; i<16*block_count; i++) printf("%c", (char)ciphered_text[i]);
-  // Spacing only 1 line results in an unknown character being added to the end of the following line
-  printf("\n\n");
-
-  return ciphered_text;
-}
-
-char * decipher_text(char *ciphered_text, uint8_t *key, int key_size){
-
-  int i, j, block_count;
-  char *deciphered_block;
-  char *plain_text;
-
-  block_count = (int)((strlen(ciphered_text)-1)/16)+1;
-
-  plain_text = malloc(16*block_count*sizeof(char));
-
-  char **block_arr = malloc(block_count*sizeof(char *));
-  for(i=0; i<block_count; i++)
-    block_arr[i] = malloc(16*sizeof(char));
-
-  for(i=0; i<block_count; i++)
-    for(j=0; j<16; j++)
-      block_arr[i][j] = ciphered_text[16*i+j];
-
-  for(i=0; i<block_count; i++)
-  {
-    deciphered_block = decipher_block(block_arr[i], key, key_size);
-    for(j=0; j<16; j++)
-        block_arr[i][j] = deciphered_block[j];
-  }
-
-  for(i=0; i<block_count; i++)
-  {
-    for(j=0; j<16; j++)
-        plain_text[16*i+j] = block_arr[i][j];
-  }
-
-  printf("plain text : ");
-  for(i=0; i<16*block_count; i++) printf("%c", (char)plain_text[i]);
-  printf("\n\n");
-
-  return plain_text;
-}
-
-int ecb_cipher(char *file_path, uint8_t *key, int key_size){
-
-    FILE *file;
-    size_t read_char_count, wrote_char_count;
-
-    fpos_t *pos = malloc(sizeof(fpos_t));
-    char *block = malloc(16*sizeof(uint8_t));
-
-    if ( !(file = fopen(file_path, "rb+")) ) {
-      return EXIT_FAILURE;
-    }
-
-    while(!feof(file)){
-
-      while( ( read_char_count = fread(block, 1, 16*sizeof(uint8_t), file) ) > 0 ) {
-        block = cipher_block(block, key, key_size);
-        printf("cblock : %s\n", block);
-        fseek(file, -read_char_count, SEEK_CUR);
-        wrote_char_count = fwrite(block , 1, 16*sizeof(uint8_t), file);
-        printf("chars wrote : %d\n", wrote_char_count);
-      }
-
-    }
-    fclose(file);
-    return EXIT_SUCCESS;
-}
-
-int ecb_decipher(char *file_path, uint8_t *key, int key_size){
-
-    FILE *file;
-    size_t read_char_count, wrote_char_count;
-
-    fpos_t *pos = malloc(sizeof(fpos_t));
-    uint8_t *block = malloc(16*sizeof(uint8_t));
-
-    if ( !(file = fopen(file_path, "rb+")) ) {
-      return EXIT_FAILURE;
-    }
-
-    while ( !feof(file) ) {
-
-      while( ( read_char_count = fread(block, 1, 16*sizeof(uint8_t), file) ) > 0 )
-      {
-        block = decipher_block(block, key, key_size);
-        fseek(file, -read_char_count, SEEK_CUR);
-        wrote_char_count = fwrite(block , 1, 16*sizeof(uint8_t), file);
-      }
-
-    }
-    fclose(file);
-    return EXIT_SUCCESS;
-}
-
-// !! CHANGE IV TO SOMETHING RANDOM AND RETURN IT
-int ofb_cipher(char *file_path, uint8_t *key, int key_size) {
-  FILE *file;
-  size_t read_char_count;
-  uint8_t *ciphered_block, *data_block;
-  int i;
-
-  uint8_t iv[] = "0123456789ABCDEF";
-
-  ciphered_block = malloc(16*sizeof(uint8_t));
-  data_block = malloc(16*sizeof(uint8_t));
-
-  for(i=0; i<16; i++)
-   ciphered_block[i] = iv[i];
-
-  if ( !(file = fopen(file_path, "rb+")) ) {
-    return EXIT_FAILURE;
-  }
-
-  while( (read_char_count = fread(data_block, 1, 16*sizeof(uint8_t), file)) > 0)
-  {
-    ciphered_block = cipher_block(ciphered_block, key, key_size);
-    for(i=0; i<16; i++){
-      data_block[i] ^= ciphered_block[i];
-    }
-    fseek(file, -read_char_count, SEEK_CUR);
-    fwrite(data_block, 1, 16*sizeof(uint8_t), file);
+  switch (encryption_mode) {
+    case 0 /*ECB*/:
+      printf("Not implemented yet\n");
+      break;
+    case 1 /*OFB*/:
+      ofb_encrypt(key, key_size, file);
+      break;
+    default:
+      printf("Please specify an encryption mode\n");
+      break;
   }
 
   fclose(file);
+
+  return EXIT_SUCCESS;
+}
+
+int decrypt_file(uint8_t* key, int key_size, int encryption_mode, char* filepath) {
+
+  FILE* file;
+
+  file = fopen(filepath, "rb");
+
+  switch (encryption_mode) {
+    case 0 /*ECB*/:
+      printf("Not implemented yet\n");
+      break;
+    case 1 /*OFB*/:
+      ofb_decrypt(key, key_size, file);
+      break;
+    default:
+      printf("Please specify a decryption mode\n");
+      break;
+  }
+
+  fclose(file);
+
+  // delete original file
+
+  // rename encrypted file to original file name
+
+  return EXIT_SUCCESS;
+}
+
+int ofb_round(uint8_t* key, int key_size, uint8_t* iv, uint8_t* data_block) {
+  int i;
+  cipher_block(iv, key, key_size);
+  for (i=0; i<16; i++) data_block[i] ^= iv[i];
+}
+
+int ofb_encrypt(uint8_t* key, int key_size, FILE* file) {
+
+  int rcc, p;
+  uint8_t *data_block, *iv;
+  FILE* wfile;
+
+  wfile = fopen("wfile", "wb+");
+
+  iv = malloc(16*sizeof(uint8_t));
+  data_block = malloc(16*sizeof(uint8_t));
+
+  getrandom(iv, 16, 0);
+
+  // Write the header
+  fwrite(iv, (size_t)1, (size_t)16, wfile);
+
+  while ( (rcc = fread(data_block, (size_t)1, (size_t)16, file)) == 16) {
+    ofb_round(key, key_size, iv, data_block);
+    fwrite(data_block, (size_t)1, (size_t)16, wfile);
+  }
+
+  // PKCS#7 compliant padding
+  if (rcc != 0) {
+    p = 16-rcc;
+    memset(data_block+rcc, p, p);
+    ofb_round(key, key_size, iv, data_block);
+    fwrite(data_block, (size_t)1, (size_t)16, wfile);
+  }
+  else {
+    memset(data_block, 16, 16);
+    ofb_round(key, key_size, iv, data_block);
+    fwrite(data_block, (size_t)1, (size_t)16, wfile);
+  }
+
+  fclose(wfile);
+
+  return EXIT_SUCCESS;
+}
+
+int ofb_decrypt(uint8_t* key, int key_size, FILE* file) {
+
+  int rcc, p;
+  uint8_t *data_block, *iv;
+  FILE* wfile;
+  fpos_t* position;
+
+  wfile = fopen("wfile", "wb+");
+
+  iv = malloc(16*sizeof(uint8_t));
+  data_block = malloc(16*sizeof(uint8_t));
+  position = malloc(sizeof(fpos_t));
+
+  getrandom(iv, 16, 0);
+
+  // Read the header and assign the IV value
+  fread(iv, (size_t)1, (size_t)16, file);
+
+  while ( (rcc = fread(data_block, (size_t)1, (size_t)16, file)) == 16) {
+    ofb_round(key, key_size, iv, data_block);
+
+    // If next data block is EOF breaks
+    fgetpos(file, position);
+    getc(file);
+    if (feof(file)) {
+      break;
+    }
+    fsetpos(file, position);
+
+    fwrite(data_block, (size_t)1, (size_t)16, wfile);
+  }
+
+  // Write the block minus the padding
+  p = 16 - data_block[15];
+  fwrite(data_block, (size_t)1, (size_t)p, wfile);
+
+  fclose(wfile);
+
   return EXIT_SUCCESS;
 }

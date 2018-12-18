@@ -5,17 +5,18 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <sys/random.h>
 
 #include "aes_func.h"
 
-char * cipher_text(char *plain_text, uint8_t *key, int key_size);
+int encrypt_file(uint8_t* key, int key_size, int encryption_mode, char* filepath);
 
-char * decipher_text(char *ciphered_text, uint8_t *key, int key_size);
+int decrypt_file(uint8_t* key, int key_size, int encryption_mode, FILE* ciph_file);
 
-int ecb_cipher(char *file_path, uint8_t *key, int key_size);
+int ofb_round(uint8_t* key, int key_size, uint8_t* iv, uint8_t* data_block);
 
-int ecb_decipher_file(char *file_path, uint8_t *key, int key_size);
+int ofb_encrypt(uint8_t* key, int key_size, FILE* file);
 
-int ofb_cipher(char *file_path, uint8_t *key, int key_size);
+int ofb_decrypt(uint8_t* key, int key_size, FILE* file);
 
 #endif

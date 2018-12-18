@@ -1,8 +1,8 @@
 # C AES Cipher
 
 Disclaimer : I am working on this project to train myself, and it is not safe
-(and probably will never be) for encryption usage and can in no way be held
-accountable to damages caused by the use of this program.
+(and probably will never be) for encryption usage and I can in no way be held
+accountable to damages caused by the use of this program
 
 Feel free to download and share the code as you please but give me credits if
 you do so
@@ -20,6 +20,7 @@ cipher
 ### Specifications :
 
 Block size : 128 bits
+
 Accepted key length : 128, 192 or 256 bits
 
 Cipher modes : ECB and OFB
