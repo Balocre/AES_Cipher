@@ -2,23 +2,21 @@
 
 int encrypt_file(uint8_t* key, int key_size, int encryption_mode, char* filepath) {
 
-  FILE* file;
-
-  file = fopen(filepath, "rb");
-
   switch (encryption_mode) {
     case 0 /*ECB*/:
       printf("Not implemented yet\n");
       break;
     case 1 /*OFB*/:
-      ofb_encrypt(key, key_size, file);
+      ofb_encrypt(key, key_size, filepath);
       break;
     default:
       printf("Please specify an encryption mode\n");
       break;
   }
 
-  fclose(file);
+  // delete original file
+
+  // rename encrypted file to original file name
 
   return EXIT_SUCCESS;
 }
@@ -34,7 +32,7 @@ int decrypt_file(uint8_t* key, int key_size, int encryption_mode, char* filepath
       printf("Not implemented yet\n");
       break;
     case 1 /*OFB*/:
-      ofb_decrypt(key, key_size, file);
+      ofb_decrypt(key, key_size, filepath);
       break;
     default:
       printf("Please specify a decryption mode\n");
@@ -42,10 +40,6 @@ int decrypt_file(uint8_t* key, int key_size, int encryption_mode, char* filepath
   }
 
   fclose(file);
-
-  // delete original file
-
-  // rename encrypted file to original file name
 
   return EXIT_SUCCESS;
 }
@@ -56,13 +50,15 @@ int ofb_round(uint8_t* key, int key_size, uint8_t* iv, uint8_t* data_block) {
   for (i=0; i<16; i++) data_block[i] ^= iv[i];
 }
 
-int ofb_encrypt(uint8_t* key, int key_size, FILE* file) {
+int ofb_encrypt(uint8_t* key, int key_size, char* filepath) {
 
   int rcc, p;
   uint8_t *data_block, *iv;
-  FILE* wfile;
+  FILE *file, *wfile;
 
-  wfile = fopen("wfile", "wb+");
+  // TODO: add safety checks
+  file = fopen(filepath, "rb");
+  wfile = fopen(".wfile", "wb+");
 
   iv = malloc(16*sizeof(uint8_t));
   data_block = malloc(16*sizeof(uint8_t));
@@ -90,19 +86,24 @@ int ofb_encrypt(uint8_t* key, int key_size, FILE* file) {
     fwrite(data_block, (size_t)1, (size_t)16, wfile);
   }
 
+  // Replace the unencrypted file with its encrypted counterpart
+  fclose(file);
+  remove(filepath);
   fclose(wfile);
+  rename(".wfile", filepath);
 
   return EXIT_SUCCESS;
 }
 
-int ofb_decrypt(uint8_t* key, int key_size, FILE* file) {
+int ofb_decrypt(uint8_t* key, int key_size, char* filepath) {
 
   int rcc, p;
   uint8_t *data_block, *iv;
-  FILE* wfile;
+  FILE *file, *wfile;
   fpos_t* position;
 
-  wfile = fopen("wfile", "wb+");
+  file = fopen(filepath, "rb");
+  wfile = fopen(".wfile", "wb+");
 
   iv = malloc(16*sizeof(uint8_t));
   data_block = malloc(16*sizeof(uint8_t));
@@ -119,9 +120,7 @@ int ofb_decrypt(uint8_t* key, int key_size, FILE* file) {
     // If next data block is EOF breaks
     fgetpos(file, position);
     getc(file);
-    if (feof(file)) {
-      break;
-    }
+    if ( feof(file) ) break;
     fsetpos(file, position);
 
     fwrite(data_block, (size_t)1, (size_t)16, wfile);
@@ -131,7 +130,10 @@ int ofb_decrypt(uint8_t* key, int key_size, FILE* file) {
   p = 16 - data_block[15];
   fwrite(data_block, (size_t)1, (size_t)p, wfile);
 
+  fclose(file);
+  remove(filepath);
   fclose(wfile);
+  rename(".wfile", filepath);
 
   return EXIT_SUCCESS;
 }

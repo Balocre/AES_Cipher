@@ -4,31 +4,35 @@ Disclaimer : I am working on this project to train myself, and it is not safe
 (and probably will never be) for encryption usage and I can in no way be held
 accountable to damages caused by the use of this program
 
-Feel free to download and share the code as you please but give me credits if
+Feel free to download and share the code as you please but credit me if
 you do so
 
 There is still plenty of work to do and I will update it when I can, any
-improvement suggestion (about the algorithm or my code in general), advices or
+improvements suggestions (about the cipher or my code in general), advices or
 questions, are welcome, and you can contact me at this address :
 antoineaudras[at]gmail[dot]com
 
 ### In short :
 
-An encryption program built around an implementation of a FIPS-197 compliant AES
-cipher
+A lightweight portable file encryption program for UNIX systems built around an
+implementation of a FIPS-197 compliant AES cipher
 
 ### Specifications :
 
-Block size : 128 bits
+The AES has been implemented following the [FIPS-197](https://nvlpubs.nist.gov/nistpubs/fips/nist.fips.197.pdf)
+specifications
+
+State size : 128 bits
 
 Accepted key length : 128, 192 or 256 bits
 
-Cipher modes : ECB and OFB
+Available cipher modes : OFB
 
 ### Features
 
-It can cipher/decipher text (or any data) of unspecified length with different
-modes of encryption using 128, 192 or 256 bits keys
+It can cipher/decipher any file of unspecified length (as long as you have
+enough memory space available ) with different modes of encryption using 128,
+192 or 256 bits keys
 
 ### Usage :
 
@@ -41,4 +45,4 @@ Options :
 - m -> mode : ECB | OFB
 - f -> file : path to the file you want to operate on
 
-ex : aes -o cipher -m OFB -f myfile
+ex : ./aes -o cipher -m OFB -f myfile

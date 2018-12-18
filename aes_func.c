@@ -10,7 +10,7 @@
 
 #include "aes_func.h"
 
-int sub_bytes(uint8_t *state, const uint8_t sub_box[16][16])
+int sub_bytes(uint8_t* state, const uint8_t sub_box[16][16])
 {
 	int i;
 
@@ -21,11 +21,11 @@ int sub_bytes(uint8_t *state, const uint8_t sub_box[16][16])
 }
 
 // direction : -1 = LEFT, +1 = RIGHT
-int shift_rows(uint32_t *state, int direction)
+int shift_rows(uint32_t* state, int direction)
 {
 	// Calculates the shift coefficients needed to perform the row circular permutation
   int aa = abs(direction*16-8);
-  int bb = abs(direction*16+8); // Or 32 - aa
+  int bb = 32-aa;
 
   // sate[0] stays unchanged
   state[1] = (state[1] >> aa) | (state[1] << bb);
@@ -36,11 +36,11 @@ int shift_rows(uint32_t *state, int direction)
 }
 
 // TODO : find a way to only work on 1 column at a time
-int mix_columns(uint8_t *state, const uint8_t aes_mult_mat[4][4])
+int mix_columns(uint8_t* state, const uint8_t aes_mult_mat[4][4])
 {
 	int i, j, k;
 
-	uint8_t *state_buffer = calloc(16, sizeof(uint8_t));
+	uint8_t* state_buffer = calloc(16, sizeof(uint8_t));
 
 	for(i=0; i<4; i++)
 		for(j=0; j<4; j++)
@@ -54,7 +54,7 @@ int mix_columns(uint8_t *state, const uint8_t aes_mult_mat[4][4])
 }
 
 // TODO : only store necessary round key and not whole 32 bytes
-int add_round_key(uint8_t *state, uint32_t *extanded_key, int rnd)
+int add_round_key(uint8_t* state, uint32_t* extanded_key, int rnd)
 {
 	int i;
 
@@ -72,7 +72,7 @@ int add_round_key(uint8_t *state, uint32_t *extanded_key, int rnd)
 uint8_t* cipher_block(uint8_t* block, uint8_t* key, int key_size)
 {
 	int i, j;
-	uint32_t *expanded_key;
+	uint32_t* expanded_key;
 	State_t state;
 
 	for(i=0; i<4; i++)
@@ -113,11 +113,11 @@ uint8_t* cipher_block(uint8_t* block, uint8_t* key, int key_size)
 	return block;
 }
 
-uint8_t * decipher_block(uint8_t *block, uint8_t *key, int key_size)
+uint8_t* decipher_block(uint8_t* block, uint8_t* key, int key_size)
 {
 	int i, j;
 
-	uint32_t *expanded_key;
+	uint32_t* expanded_key;
 
 	State_t state;
 
