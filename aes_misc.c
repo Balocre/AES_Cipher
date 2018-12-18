@@ -1,3 +1,10 @@
+/*
+/ aes_misc.c
+/
+/ This file contains the implementations of the files used for the encryption
+/ process
+/ */
+
 #include "aes_misc.h"
 
 int encrypt_file(uint8_t* key, int key_size, int encryption_mode, char* filepath) {
@@ -13,10 +20,6 @@ int encrypt_file(uint8_t* key, int key_size, int encryption_mode, char* filepath
       printf("Please specify an encryption mode\n");
       break;
   }
-
-  // delete original file
-
-  // rename encrypted file to original file name
 
   return EXIT_SUCCESS;
 }
@@ -73,7 +76,7 @@ int ofb_encrypt(uint8_t* key, int key_size, char* filepath) {
     fwrite(data_block, (size_t)1, (size_t)16, wfile);
   }
 
-  // PKCS#7 compliant padding
+  // add PKCS#7 compliant padding to the last data block
   if (rcc != 0) {
     p = 16-rcc;
     memset(data_block+rcc, p, p);
@@ -117,7 +120,7 @@ int ofb_decrypt(uint8_t* key, int key_size, char* filepath) {
   while ( (rcc = fread(data_block, (size_t)1, (size_t)16, file)) == 16) {
     ofb_round(key, key_size, iv, data_block);
 
-    // If next data block is EOF breaks
+    // If next byte is EOF breaks
     fgetpos(file, position);
     getc(file);
     if ( feof(file) ) break;

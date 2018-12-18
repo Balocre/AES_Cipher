@@ -1,8 +1,8 @@
 /*
 / aes_func.c
 /
-/ This file contains the main function of the encryption process of the AES
-/ cipher
+/ This file contains the implementations of the  functions of the encryption
+/ process of the AES cipher
 /
 / The key expansion routine functions definitions can be found in file
 / the key_exp_func.c
