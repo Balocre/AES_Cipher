@@ -36,40 +36,44 @@ uint32_t rot_word(uint32_t word)
 	return word;
 }
 
-uint32_t * key_expansion(uint8_t *key, int key_size)
+uint32_t* key_expansion(uint8_t *key, int key_size)
 {
-	//nk, nombred de mots de la clé 128 -> 4, 19 -> 6, ou 256 -> 8
-	//Nr, nombre de rounds 128 -> 10 192 -> 12 256 -> 14 (6 + nk)
-	//Nb, nombre de colones du state ici 4
+	//nk number of 32 bits word of the key 128 -> 4, 19 -> 6, ou 256 -> 8
+	//nr number of rounds 128 -> 10 192 -> 12 256 -> 14 (6 + nk)
 
-	int i, j;
-	int nk = key_size/32;
-	uint32_t temp;
-  uint32_t *expanded_key = malloc(4*(6+nk+1)*sizeof(uint32_t));
+	int i, j, nk, nr;
+	uint32_t w_buff, *expanded_key;
+	
+	nk = key_size/32;
+	nr = 6+nk;
+	
+	expanded_key = malloc(4*(nr+1)*sizeof(uint32_t));
 
-	//extanded_key is filled with the value of the key
+	//first 32 bits word of the expanded key is initalized
 	for(i=0; i<nk; i++)
 	{
 		expanded_key[i]  = key[4*i]   << 24;
-    expanded_key[i] |= key[4*i+1] << 16;
-    expanded_key[i] |= key[4*i+2] << 8;
-    expanded_key[i] |= key[4*i+3];
+		expanded_key[i] |= key[4*i+1] << 16;
+		expanded_key[i] |= key[4*i+2] << 8;
+		expanded_key[i] |= key[4*i+3];
 	}
 
-	//we extand key
-	for(i=nk; i<4*(6+nk+1); i++)
+	//key expansion routine
+	//TODO: check if there is an issue with endianness an RCON LSHIFT
+	for(i=nk; i<4*(nr+1); i++)
 	{
-		temp = expanded_key[i-1];
+		w_buff = expanded_key[i-1];
+	
 		if(i%nk == 0)
 		{
-			temp = sub_word(rot_word(temp)) ^ RCON[(i/nk)-1] << 24;//RCON is in aes_const.h
+			w_buff = sub_word(rot_word(w_buff)) ^ RCON[(i/nk)-1] << 24;
 		}
-		else if (nk > 6 && i%nk == 4)
+		else if (nk>6 && i%nk == 4)
 		{
-			temp = sub_word(temp);
-		}/*only for 256 bit keys*/
+			w_buff = sub_word(w_buff);
+		}//only executed for 256 bit keys
 
-		expanded_key[i] = expanded_key[i-nk] ^ temp;
+		expanded_key[i] = expanded_key[i-nk]^w_buff;
 	}
 
 	return expanded_key;

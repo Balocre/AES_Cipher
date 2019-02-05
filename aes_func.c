@@ -71,9 +71,11 @@ int add_round_key(uint8_t* state, uint32_t* extanded_key, int rnd)
 
 uint8_t* cipher_block(uint8_t* block, uint8_t* key, int key_size)
 {
-	int i, j;
+	int i, j, nr;
 	uint32_t* expanded_key;
 	State_t state;
+	
+	nr = 6 + (key_size/32); 
 
 	for(i=0; i<4; i++)
 		for(j=0; j<4; j++)
@@ -85,41 +87,36 @@ uint8_t* cipher_block(uint8_t* block, uint8_t* key, int key_size)
 
 	add_round_key(state.by_el, expanded_key, i);
 
-	for(i=1; i<10; i++)
+	while(i<nr-1)
 	{
+		i++;
 		sub_bytes(state.by_el, AES_SUB_BOX);
 		shift_rows(state.by_row, 1);
 		mix_columns(state.by_el, AES_MULT_MAT);
 		add_round_key(state.by_el, expanded_key, i);
 	}
 
-	i = 10;
+	i = nr;
 
-  sub_bytes(state.by_el, AES_SUB_BOX);
-  shift_rows(state.by_row, 1);
-  add_round_key(state.by_el, expanded_key, i);
+  	sub_bytes(state.by_el, AES_SUB_BOX);
+  	shift_rows(state.by_row, 1);
+  	add_round_key(state.by_el, expanded_key, i);
 
-  // Copy state to the returned ciphered data block
-	// Transposition because data is written in state columns
 	for(i=0; i<4; i++)
 		for(j=0; j<4; j++)
-		{
 			block[4*i+j] = state.by_el[4*j+i];
-			block[4*i+j] = state.by_el[4*j+i];
-			block[4*i+j] = state.by_el[4*j+i];
-			block[4*i+j] = state.by_el[4*j+i];
-		}
 
 	return block;
 }
 
 uint8_t* decipher_block(uint8_t* block, uint8_t* key, int key_size)
 {
-	int i, j;
-
+	int i, j, nr;
 	uint32_t* expanded_key;
 
 	State_t state;
+
+	nr = 6 + (key_size/32);
 
 	for(i=0; i<4; i++)
 		for(j=0; j<4; j++)
@@ -127,14 +124,15 @@ uint8_t* decipher_block(uint8_t* block, uint8_t* key, int key_size)
 
 	expanded_key = key_expansion(key, key_size);
 
-	i = 10;
+	i = nr;
 
 	add_round_key(state.by_el, expanded_key, i);
 	shift_rows(state.by_row, -1);
 	sub_bytes(state.by_el, INV_AES_SUB_BOX);
 
-	for(i=9; i>0; i--)
+	while(i>1)
 	{
+		i--;
 		add_round_key(state.by_el, expanded_key, i);
 		mix_columns(state.by_el, INV_AES_MULT_MAT);
 		shift_rows(state.by_row, -1);
@@ -147,12 +145,7 @@ uint8_t* decipher_block(uint8_t* block, uint8_t* key, int key_size)
 
 	for(i=0; i<4; i++)
 		for(j=0; j<4; j++)
-		{
 			block[4*i+j] = state.by_el[4*j+i];
-			block[4*i+j] = state.by_el[4*j+i];
-			block[4*i+j] = state.by_el[4*j+i];
-			block[4*i+j] = state.by_el[4*j+i];
-		}
 
 	return block;
 }
