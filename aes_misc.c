@@ -1,9 +1,9 @@
 /*
-/ aes_misc.c
-/
-/ This file contains the implementations of the files used for the encryption
-/ process
-/ */
+ * aes_misc.c
+ *
+ * This file contains the implementations of the files used for the encryption
+ * process
+ */
 
 #include "aes_misc.h"
 
@@ -59,7 +59,7 @@ int ofb_encrypt(uint8_t* key, int key_size, char* filepath) {
   uint8_t *data_block, *iv;
   FILE *file, *wfile;
 
-  // TODO: add safety checks
+  /* TODO: add safety checks */
   file = fopen(filepath, "rb");
   wfile = fopen(".wfile", "wb+");
 
@@ -68,7 +68,7 @@ int ofb_encrypt(uint8_t* key, int key_size, char* filepath) {
 
   getrandom(iv, 16, 0);
 
-  // Write the header
+  /* Write the header */
   fwrite(iv, (size_t)1, (size_t)16, wfile);
 
   while ( (rcc = fread(data_block, (size_t)1, (size_t)16, file)) == 16) {
@@ -76,7 +76,7 @@ int ofb_encrypt(uint8_t* key, int key_size, char* filepath) {
     fwrite(data_block, (size_t)1, (size_t)16, wfile);
   }
 
-  // add PKCS#7 compliant padding to the last data block
+  /* add PKCS#7 compliant padding to the last data block */
   if (rcc != 0) {
     p = 16-rcc;
     memset(data_block+rcc, p, p);
@@ -89,7 +89,7 @@ int ofb_encrypt(uint8_t* key, int key_size, char* filepath) {
     fwrite(data_block, (size_t)1, (size_t)16, wfile);
   }
 
-  // Replace the unencrypted file with its encrypted counterpart
+  /* Replace the unencrypted file with its encrypted counterpart */
   fclose(file);
   remove(filepath);
   fclose(wfile);
@@ -114,13 +114,13 @@ int ofb_decrypt(uint8_t* key, int key_size, char* filepath) {
 
   getrandom(iv, 16, 0);
 
-  // Read the header and assign the IV value
+  /* Read the header and assign the IV value */
   fread(iv, (size_t)1, (size_t)16, file);
 
   while ( (rcc = fread(data_block, (size_t)1, (size_t)16, file)) == 16) {
     ofb_round(key, key_size, iv, data_block);
 
-    // If next byte is EOF breaks
+    /* If next byte is EOF break */
     fgetpos(file, position);
     getc(file);
     if ( feof(file) ) break;
@@ -129,7 +129,7 @@ int ofb_decrypt(uint8_t* key, int key_size, char* filepath) {
     fwrite(data_block, (size_t)1, (size_t)16, wfile);
   }
 
-  // Write the block minus the padding
+  /* Write the block minus the padding */
   p = 16 - data_block[15];
   fwrite(data_block, (size_t)1, (size_t)p, wfile);
 
